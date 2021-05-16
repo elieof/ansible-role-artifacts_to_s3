@@ -1,0 +1,24 @@
+galaxy_info:
+  author: Olivier Ouemba
+  description: Allow to create an archive from git and save it to aws s3
+  role_name: artifacts_to_s3
+  namespace: elieof
+
+  license: license MIT
+
+  min_ansible_version: 2.4
+
+  platforms:
+    - name: Alpine
+      versions:
+        - any
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+        - focal
+        - groovy
+
+  galaxy_tags: []
+
+dependencies: []

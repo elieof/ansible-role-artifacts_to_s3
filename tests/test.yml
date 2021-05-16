@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars:
+    my_project_name: autotest_artifacts_to_s3
+    my_version_lot: 1.0.0
+
+
+  tasks :
+    - include_role:
+        name: ../../ansible-role-artifacts_to_s3
+      vars:
+        repository: "git@github.com:elieof/ansible-eoo-consul.git"
+        project_name: "{{my_project_name}}"
+        version_lot: "{{my_version_lot}}"
+        archive_name: git_package
+        repository_type: "git"
+

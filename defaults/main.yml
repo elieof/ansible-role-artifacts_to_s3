@@ -1,0 +1,12 @@
+---
+# defaults file for artifacts_to_s3
+bucket: elieof-eoo
+ansible_root: user_data
+compress: true
+package_type: zip
+git_version: main
+get_url_timeout: 10
+ansible_galaxy_location: "~/.local/bin/ansible-galaxy"
+tar_content_to_root: true
+aws_region: eu-west-1
+repository_type: git

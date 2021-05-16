@@ -1,0 +1,6 @@
+---
+# vars file for artifacts_to_s3
+repository:
+version_lot:
+project_name:
+archive_name:

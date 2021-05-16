@@ -1,0 +1,12 @@
+---
+#Specific GIT tasks
+  - name: Getting repository files (GIT)
+    git:
+      repo: "{{repository}}"
+      dest: "{{tmpdir.path}}"
+      version: "{{git_version}}"
+
+  - name: Deleting .git subdirectory
+    file:
+      path: "{{tmpdir.path}}/.git/"
+      state: absent

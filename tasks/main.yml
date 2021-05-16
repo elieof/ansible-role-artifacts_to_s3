@@ -1,0 +1,65 @@
+---
+# tasks file for artifacts_to_s3
+- name: "Running artifacts_to_s3 for package {{archive_name}}"
+  block:
+  - name: "Creating new temporary working directory - {{archive_name}}"
+    tempfile:
+      prefix: "a_2_s3_"
+      state: directory
+    register: tmpdir
+
+
+  - name: Install pip3 requirements
+    pip:
+      requirements: "{{role_path}}/tasks/requirements.txt"
+
+  - include_tasks: "{{role_path}}/tasks/repository/{{repository_type}}.yml"
+
+  - name: Checking if requirements.yml exists
+    stat:
+      path: "{{tmpdir.path}}/{{ansible_root}}/requirements.yml"
+    register: requirement
+
+  - name: Downloading requirements (Ansible only - if requirements file exists)
+    shell: "{{ansible_galaxy_location}} install -p {{tmpdir.path}}/{{ansible_root}}/roles/ -r {{tmpdir.path}}/{{ansible_root}}/requirements.yml"
+    when: requirement.stat.exists
+
+  - name: "Creating {{package_type}} archive"
+    community.general.archive:
+      path: "{{tmpdir.path}}"
+      format: "{{package_type}}"
+      dest: "{{tmpdir.path}}/{{archive_name}}.{{package_type}}"
+    when: compress and package_type == "zip"
+
+  - name: "Creating {{package_type}} archive"
+    community.general.archive:
+      path: "{{tmpdir.path}}"
+      format: gz
+      force_archive: true
+      dest: "{{tmpdir.path}}/{{archive_name}}.{{package_type}}"
+    when: compress and package_type == "tar.gz"
+
+  # - name: Moving archive
+    # shell: "mv /tmp/{{archive_name}}.{{package_type}} {{tmpdir.path}}/{{archive_name}}.{{package_type}}"
+
+  - name: Check if bucket exists ({{bucket}})
+    aws_s3:
+      bucket: "{{bucket}}"
+      mode: list
+      region: "{{aws_region}}"
+    when: bucket != "elieof-eoo"
+
+  - name: Pushing archive to S3 bucket ({{bucket}}/artifacts/projects/{{project_name}}/releases/{{version_lot}})
+    aws_s3:
+      bucket: "{{bucket}}"
+      object: "/artifacts/projects/{{project_name}}/releases/{{version_lot}}/{{archive_name}}.{{package_type}}"
+      src: "{{tmpdir.path}}/{{archive_name}}.{{package_type}}"
+      mode: put
+      region: "{{aws_region}}"
+      permission: "authenticated-read"
+
+  always:
+  - name: "[{{archive_name}}] Cleaning working directory"
+    file:
+      path: "{{tmpdir.path}}"
+      state: absent
